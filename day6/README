@@ -1,0 +1,16 @@
+
+aoc 2021 day 6 challenge
+
+chicken lsp server
+projectile
+CHICKEN_SOURCE_PATH
+
+this is a real ball ache ... grovelling in toilet here ... 
+
+<scheme>
+ (import (lsp-server))
+ (parameterize ((lsp-server-log-level 'debug))
+    (lsp-server-start/tcp 10001))
+
+what is current lsp-server-log-level
+
