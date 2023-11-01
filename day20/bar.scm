@@ -233,16 +233,18 @@ g h i
 
 
 (define sol-str  (call-with-input-file "slide2" (lambda (port)  (read port))))
+(define sol-str2  (call-with-input-file "solution50" (lambda (port)  (read port))))
+
 
 (define (1+ x) (+ x 1))
 
-(define sol
-  (let ((len (string-length sol-str))
+(define (sol s)
+  (let ((len (string-length s))
 	(count 0))
     (letrec ((foo (lambda (n)
 		  (cond
 		   ((>= n len) count)
-		   (#t (let ((ch (string-ref sol-str n)))
+		   (#t (let ((ch (string-ref s n)))
 			 (when (char=? #\# ch)
 			   (set! count (1+ count)))
 			 (foo (+ n 1))))))))
@@ -250,14 +252,14 @@ g h i
 
 
 (define (multiple-pass)
-  (let ((lo-x (- min-x 100))
-	(lo-y (- min-y 100))
-	(hi-x (+ max-x 100))
-	(hi-y (+ max-y 100)))    
+  (let ((lo-x (- min-x 300))
+	(lo-y (- min-y 300))
+	(hi-x (+ max-x 300))
+	(hi-y (+ max-y 300)))    
     (letrec ((foo (lambda (ha n)
 		    (cond
 		     ((> n 50) #f)
-		     (#t (let ((filename (format #f "multi-slide~a~%" n)))
+		     (#t (let ((filename (format #f "multi-slide~a" n)))
 			   (call-with-output-file filename
 			     (lambda (port)
 			       (file-tidy port ha lo-x hi-x lo-y hi-y))))
@@ -265,7 +267,7 @@ g h i
       (foo init-hash 0))))
 
 
-;;(multiple-pass)
+(multiple-pass)
 
 
 
@@ -279,6 +281,16 @@ g h i
 5486 are lit after two iterations of the image algorithm
 
 accepted answer
+
+PART - B
+
+running (multiple-pass) generates files
+noise introduced on lower left side 
+
+#;2487> (sol sol-str2)
+20210
+
+
 
 
 |#
