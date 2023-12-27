@@ -1,0 +1,80 @@
+
+if we make movement choices semi-random
+have several processes all working on their own search
+find we get better results
+
+how can we coordinate between the search processes such that
+
+master process
+proc1  - 702
+proc2  - 712
+proc3  - 732
+proc4  - 742
+proc5  - 752
+proc6  - 722
+proc7  - 590
+proc8  - 690
+proc9   - 802
+proc10   - 703
+proc11  - 432
+proc12   - 432
+proc13  - 456
+
+
+how can i get all processes to look at master and see aha ! there is maximum cost which
+we cannot exceed so stop search if cost is exceeded ...
+
+
+
+
+
+
+
+lets suppose in general if can only move up left right or down on 2d matrix
+
+  C
+A ? B
+  D
+
+the cost of getting to square ? is through one of A , B , C or D
+
+then the minimum cost of ? will be min (A,B,C,D) + cost of ? itself
+
+A C D G K P V
+B E H L Q W
+F I M R X
+J N S Y 
+O T Z
+U A2
+B2
+
+
+
+
+see SPEC file for ideas on how to think about the problem
+
+SPEC file is a way to think about this problem , devoid of programming concerns
+
+macro1.scm
+can do simple macro that does not take expression apart
+is implicit renaming ir-macro the better ?
+
+
+compiling solve2.scm ?
+
+auto generated file solve2.scm seems to pose a big problem for scheme
+compilers
+
+10,000 procedures 100 x 100 matrix where simply adding a value from
+grid to minimum of neighbour below and to right
+
+taken from advent of code 2021 day 15
+
+get result 408
+but aoc says nope
+now says 404 , top left square has 0 risk as do not enter it , it used as
+start point according to rules does not contribute to risk
+
+
+
+
