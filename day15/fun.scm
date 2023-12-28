@@ -272,6 +272,25 @@ A
 
 
 
+#|
+;; #;1> (sum-tot input)
+;;41431
+;; 41431...100....100  encoded as
+;; <sum> ... <x coord> ... <y coord> ...
+;;
+this just adds up all the numbers in 2d array
+|#
+(define (sum-tot vec)
+  (let ((tot 0)
+	(wid (get-width vec))
+	(hgt (get-height vec)))
+    (do-list (y (iota hgt))
+      (do-list (x (iota wid))
+	       (set! tot (+ tot (get-xy vec x y)))))
+    tot))
+
+
+
 (define (run vec goal guide)
   (let* ((width (get-width vec))
 	 (height (get-height vec))
@@ -389,16 +408,18 @@ A
 (define (example-1)
   (run example))
 
-(define (part-1)
+(define (part-1 n)
   (call/cc (lambda (exit)
-	     (let ((goal 0))
-	       (do-while #t
-			 (set! goal (1+ goal))
+	     (let ((goal n))
+	       (do-while #t			 
 			 (format #t "trying goal with ~a ~%" goal)
-			 (let ((r (run input goal 'all)))
+			 (let ((r (time (run input goal 'all))))
 			   (if r
 			       (exit goal)
-			       #f)))))))
+			       (set! goal (1+ goal)))))))))
+
+
+
 
 (define (part-1b)
   (call/cc (lambda (exit)
@@ -411,6 +432,7 @@ A
 			       (exit goal)
 			       #f)))))))
 
+;; 800 ...... see if we can capture output correctly
 ;; 752 ..... single process 100%
 ;; 682 ..... multiple random processes no comms
 
@@ -426,9 +448,140 @@ A
 ;; try just going right or down
 ;;(part-1b)
 
-(part-1c)
+;;(part-1c)
 
 
+#|
+
+breadth first search
+
+discontinue interest in a square if it returns me to a square with a greater cost than is already
+at that square
+
+
+|#
+
+
+
+;;(define vec example)
+(define vec input)
+
+(define hist (deep-copy vec))
+;; make (0,0) known as value of 0
+(set-xy hist 0 0 0)
+
+(define wid (get-width vec))
+(define hgt (get-height vec))
+
+;; initial state is 
+(define states (list (list 0 0 0)))
+(define new-states 0)
+(define res '())
+
+(define (onboard? x y)
+  (and (>= x 0)(< x wid)
+       (>= y 0)(< y hgt)))
+
+(define (direction x2 y2 c)
+  (when (onboard? x2 y2)
+    (let ((cost2 (+ c (get-xy vec x2 y2)))
+	  (maybe (get-xy hist x2 y2)))
+      (cond
+       ((and (integer? maybe) (< cost2 maybe))	
+	(set! res (cons (list x2 y2 cost2) res))
+	(set! new-states (+ 1 new-states))
+	(set-xy hist x2 y2 cost2))
+       ((not maybe)
+	(set-xy hist x2 y2 cost2)
+	(set! new-states (+ 1 new-states))
+	(set! res (cons (list x2 y2 cost2) res)))
+       ((integer? maybe) #f)
+       (#t (error 'direction 'fault (list 'maybe maybe)))))))
+
+
+
+(define (right x y c)
+  (let ((x2 (+ x 1))(y2 y))
+    (direction x2 y2 c)))
+
+(define (left x y c)
+  (let ((x2 (- x 1))(y2 y))
+    (direction x2 y2 c)))
+    
+(define (up x y c)
+  (let ((x2 x)(y2 (- y 1)))
+    (direction x2 y2 c)))
+
+(define (down x y c)
+  (let ((x2 x)(y2 (+ y 1)))
+    (direction x2 y2 c)))
+    
+(define (reach s)
+  (let ((x (first s))
+	(y (second s))
+	(c (third s)))
+    (right x y c)
+    (left x y c)
+    (up x y c)
+    (down x y c)))
+
+	
+(define (breadth)
+  (set! new-states 0)
+  (do-list (s states)
+	   (reach s))
+  (set! states res)
+  (set! res '())
+  (format #t "generated ~a new states~%" new-states))
+
+(define (run)
+  (breadth)
+  ;;(pp hist)
+  (format #t "~%~%")
+  (when (> new-states 0)
+    (run)))
+
+
+
+(define (show)
+  (run)
+  (format #t "~%~%")
+  (pp hist)
+  (format #t "~%~%"))
+
+(show)
+
+
+#|
+
+
+
+    403
+    403))
+
+real	0m0.082s
+user	0m0.065s
+sys	0m0.017s
+[terry@terry-allseries day15]$ 
+
+suggested answer is 403
+
+
+
+
+
+|#
+
+
+
+
+
+
+
+
+
+
+  
 
 
 
