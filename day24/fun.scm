@@ -60,6 +60,11 @@
 (define (1+ x) (+ x 1))
 
 (define (div x y) (floor (/ x y)))
+(define (mod x y) (modulo x y))
+(define (mul x y) (* x y))
+(define (eql x y) (if (= x y) 1 0))
+(define (add x y) (+ x y))
+
 
 
 #|
@@ -336,7 +341,6 @@ eql x w
       (num->ilist (format #f "~a" x)))))
    (#t
     (error "num->ilist" (list x 'unrecognised 'type 'expected 'number 'or 'list)))))
-
 
 
 
@@ -663,6 +667,8 @@ only inputs control are n1 ... n14 for code
 
 
 
+
+
 ;; follows from test-1 results ...... provided evaluator is correct .....
 ;; w = n1
 ;; x = 1
@@ -828,7 +834,8 @@ only inputs control are n1 ... n14 for code
 	     (do-list (n2 vals)
 		      (do-list (n3 vals)
 			       (do-list (n4 vals)
-					(do-list (n5 vals)				       						
+					(do-list (n5 vals)
+						 (when (not (= n4 n5))
 						 (let ((vars `((w ,n4)
 							       (x 1)
 							       (y ,(+ n4 6))
@@ -865,42 +872,70 @@ only inputs control are n1 ... n14 for code
 							   (zout (second (assq 'z out)))
 							   (z-prime (+ 6 n4 (* 26 (+ n3 12 (* 26 (+ n2 (* 26 n1) 35)))))))
 						       
-						        (assert (or (= zout (floor (/ z-prime 26)))
+						        (assert (or ;;(= zout (floor (/ z-prime 26)))
 								   (= zout (+ n5 9 (* 26 (floor (/ z-prime 26)))))))						       
 						       (assert (or (= xout 1)
 								   (= xout 0)))
 						       (assert (or (= yout 0)
 								   (= yout (+ n5 9))))
 						       (assert (= wout n5))
-						       ))))))))))
+						       (format #t "test5 :: zout ~a : [n1 n2 n3 n4 n5] :: ~a~%" zout (list n1 n2 n3 n4 n5))
+						       )))))))))))
 
-#|
-splits cause inability to solve question
-n5 = (- (modulo z' 26) 6)
 
-where z' is (+ 6 n4 (* 26 (+ n3 12 (* 26 (+ n2 (* 26 n1) 35)))))
-n1 , n2 , n3 , n4 , n5 = [ 1 .. 9 ] inclusive
-
-|#
 
 
 #|
-suppose i try to solve the last input section
-for n14 input
+ranges possible for z-prime given n1 ,n2,n3,n4 ... [1 .. 9]
 
-test 5   line  
-test 6   line
-test 7   line
-test 8   line 
-test 9   line 
-test 10  line
-test 11  line 
-test 12  line 199
-test 13  line 217 .....
-test 14  line 235 ....
+seems to hit (= x w) when n4 = n5
+
+
+(= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 6 6) 
+(!!/= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 6 5) 
+(!!/= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 6 4) 
+(!!/= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 6 3) 
+(!!/= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 6 2) 
+(!!/= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 6 1) 
+(!!/= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 5 9) 
+(!!/= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 5 8) 
+(!!/= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 5 7) 
+(!!/= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 5 6) 
+(= x w) : [n1 n2 n3 n4 n5] :: (9 8 1 5 5) 
 
 |#
 
+(define (test-con-5)
+  (let ((yes 0)(no 0))
+    (let ((seq19 (reverse (cdr (iota 10)))))
+      (do-list (n1 seq19)
+	       (do-list (n2 seq19)		      
+			(do-list (n3 seq19)
+				 (do-list (n4 seq19)
+					  (do-list (n5 seq19)
+						   (let* ((z-prime (+ 6 n4 (* 26 (+ n3 12 (* 26 (+ n2 (* 26 n1) 35))))))
+							  (x (- (modulo z-prime 26) 6))
+							  (w n5))
+						     (cond
+						      ((= x w)
+						       (format #t "(= x w) : [n1 n2 n3 n4 n5] :: ~a ~%" (list n1 n2 n3 n4 n5))
+						       (set! yes (+ yes 1)))
+						      (#t
+						       (format #t "(!!/= x w) : [n1 n2 n3 n4 n5] :: ~a ~%" (list n1 n2 n3 n4 n5))						       
+						       (set! no (+ no 1)))))))))))
+    (list 'yes yes 'no no)))
+
+
+
+#|
+
+                    try to discover this relationship 
+ z-out ---------- to -----------  z-prime  ------------ and ------------- n6
+ 
+(let ((z-prime (+ 6 n4 (* 26 (+ n3 12 (* 26 (+ n2 (* 26 n1) 35)))))))
+  (= zout (floor (/ z-prime 26)))
+  (= zout (+ n5 9 (* 26 (floor (/ z-prime 26))))))
+|#
 (define (test-6)
   (let ((vals '(1 2 3 4 5 6 7 8 9))
 	(z 0))
@@ -945,6 +980,40 @@ test 14  line 235 ....
 			   ;; 	 (b (+ n6 15 (* 26 (div z-prime 26)))))
 			   ;;   (format #t "z = ~a : zout = ~a : a = ~a : b = ~a ~%" z zout a b ))
 			   
+			   (when (= 15 (mod z-prime 26))
+			     (when (= n6 1)
+			       (assert (= zout (/ (- z-prime 15) 26)))))
+			   
+			   (when (= 15 (mod z-prime 26))
+			     (when (not (= n6 1))
+			       (assert (= zout (+ z-prime n6)))))
+
+			   (when (not (= 15 (mod z-prime 26)))
+			     (when (= n6 1)
+			       (assert (= zout (+ n6 15 (* 26 (div z-prime 26)))))))
+			   
+			       ;; (format #t "test6 :: z-prime ~a : n6 ~a : zout ~a~%" z-prime n6 zout)))
+
+			   (when (not (= 15 (mod z-prime 26)))
+			     (when (not (= n6 1))
+			       (format #t "test6 :: z-prime ~a : n6 ~a : zout ~a~%" z-prime n6 zout)))
+
+			   
+			   
+			   ;; (when (not (= 15 (mod z-prime 26)))			     
+			   ;;   (when (not (= zout (+ n6 15 (* 26 (div z-prime 26)))))
+			   ;;     (format #t "test6 :: z-prime ~a : n6 ~a : zout ~a~%" z-prime n6 zout)))
+			   			   
+			   ;; (when (= 15 (mod z-prime 26))
+			   ;;   (when (not (= zout (/ (- z-prime 15) 26)))
+			   ;;   (format #t "test6 :: z-prime ~a : n6 = ~a : zout ~a~%" z-prime n6 zout)			   
+			   ;;   ))
+			   
+			     
+			   ;; (when (= zout (div z-prime 26))
+			   ;;   (format #t "test6 :: z-prime ~a : zout ~a~%" z-prime zout))
+			   
+			 
 			   (assert (or (= zout (div z-prime 26))
 				       (= zout (+ n6 15 (* 26 (div z-prime 26))))))
 			   
@@ -956,7 +1025,6 @@ test 14  line 235 ....
 			   
 			   (assert (= wout n6))
 			   )))))))
-
 
 
 
@@ -1203,14 +1271,6 @@ etc....
 
 |#
 
-
-
-
-
-
-
-
-
 (define (test-11)  
   (let ((vals '(1 2 3 4 5 6 7 8 9))
 	(z 817))
@@ -1420,7 +1480,7 @@ z = 21325 : 21325/26
 
 
 
-
+ 
 
 
 (define (test-14)  
@@ -1482,29 +1542,79 @@ z = 21325 : 21325/26
 
 
 
+#|
+(define (comp n)
+  (call/cc (lambda (err)
+	     (let ((prog (get-input-part n)))
+	       (do-list (com prog)
+			(cond
+			 ((eq? (car com) 'inp)  (format #t "(set! w n~a)~%" n))
+			 ((eq? (car com) 'add)  (format #t "(set! ~a ~a)~%" (cadr com) com))
+			 ((eq? (car com) 'mul)  (format #t "(set! ~a ~a)~%" (cadr com) com))
+			 ((eq? (car com) 'div)  (format #t "(set! ~a ~a)~%" (cadr com) com))
+			 ((eq? (car com) 'mod)  (format #t "(set! ~a ~a)~%" (cadr com) com))
+			 ((eq? (car com) 'eql)  (format #t "(set! ~a ~a)~%" (cadr com) com))
+			 (#t #f)))))))
+|#
+
+(define (comp n)
+  (define res '())
+  (define (conk expr)
+    (set! res (cons expr res)))
+  (call/cc (lambda (err)
+	     (let ((prog (get-input-part n)))
+	       (do-list (com prog)
+			(cond
+			 ((eq? (car com) 'inp)
+			  ;;(format #t "(set! w n~a)~%" n)
+			  (conk `(set! w ,(string->symbol (format #f "n~a" n)))))
+			 ((eq? (car com) 'add)
+			  ;;(format #t "(set! ~a ~a)~%" (cadr com) com)
+			  (conk `(set! ,(cadr com) ,com))
+			  )
+			 ((eq? (car com) 'mul)
+			  ;;(format #t "(set! ~a ~a)~%" (cadr com) com)
+			  (conk `(set! ,(cadr com) ,com))
+
+			  )
+			 ((eq? (car com) 'div)
+			  ;;(format #t "(set! ~a ~a)~%" (cadr com) com)
+			  (conk `(set! ,(cadr com) ,com))
+
+			  )
+			 ((eq? (car com) 'mod)
+			  ;;(format #t "(set! ~a ~a)~%" (cadr com) com)
+			  (conk `(set! ,(cadr com) ,com))
+
+			  )
+			 ((eq? (car com) 'eql)
+			  ;;(format #t "(set! ~a ~a)~%" (cadr com) com)
+			  (conk `(set! ,(cadr com) ,com))
+
+			  )
+			 (#t (err (list "ERR:com" com)))))
+	       (reverse res)))))
+
+
+(define (comp-all)
+  (define res '())
+  (define (conk expr)
+    (set! res (cons expr res)))  
+  (do-list (n (cdr (iota 15)))
+	   (let ((c (comp n)))
+	     (conk c)
+	     (assert (= (length c) (length (get-input-part n))))))
+  (apply append (reverse res)))
+
+
+
+			 
+	     
 
 
 
 
 
-
-
-
-(define (test-con-5)
-  (let ((yes 0)(no 0))
-    (let ((seq19 (cdr (iota 10))))
-      (do-list (n1 seq19)
-	       (do-list (n2 seq19)		      
-			(do-list (n3 seq19)
-				 (do-list (n4 seq19)
-					  (do-list (n5 seq19)
-						   (let* ((z-prime (+ 6 n4 (* 26 (+ n3 12 (* 26 (+ n2 (* 26 n1) 35))))))
-							  (x (- (modulo z-prime 26) 6))
-							  (w n5))
-						     (cond
-						      ((= x w) (set! yes (+ yes 1)))
-						      (#t (set! no (+ no 1)))))))))))
-    (list 'yes yes 'no no)))
 
 
 
@@ -1638,25 +1748,384 @@ what need is a way to reduce the program to something simpler
 		 (format #t "x in ~a : x out ~a ~%" zin zout))))))
 
 
+#|
 
+(pp (comp-all))
 
-	       
-
-
-
-
-
-
+compiles a list of equivalent operations of the machine
+in lisp 
 
 
 
 
+(do-list (n (cdr (iota 15)))
+	 (format #t "(n~a (vector-ref vv ~a))~%" n (- n 1)))
+    
+|#
 
 
 
 
 
-	
+;; fast expects a vector
+;; (time (fast (list->vector (num->ilist 12345678912345))))
+;; (time (exec '((x 0)(y 0)(w 0)(z 0)) (num->ilist 12345678912345) input))
+(define (fast-z vv)
+  (when (not (= (vector-length vv) 14))
+    (format #t "fast-z expects a vector of length 14 , only given ~a ~%given => [~a]" (vector-length vv) vv))
+  
+  (let ((x 0)
+	(y 0)
+	(w 0)
+	(z 0)
+	(n1 (vector-ref vv 0))
+	(n2 (vector-ref vv 1))
+	(n3 (vector-ref vv 2))
+	(n4 (vector-ref vv 3))
+	(n5 (vector-ref vv 4))
+	(n6 (vector-ref vv 5))
+	(n7 (vector-ref vv 6))
+	(n8 (vector-ref vv 7))
+	(n9 (vector-ref vv 8))
+	(n10 (vector-ref vv 9))
+	(n11 (vector-ref vv 10))
+	(n12 (vector-ref vv 11))
+	(n13 (vector-ref vv 12))
+	(n14 (vector-ref vv 13))
+	)
+    
+    (set! w n1)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 10))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 1))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n2)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 11))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 9))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n3)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 14))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 12))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n4)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 13))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 6))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n5)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -6))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 9))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n6)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -14))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 15))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n7)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 14))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 7))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n8)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 13))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 12))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n9)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -8))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 15))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n10)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -15))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 3))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n11)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 10))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 6))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n12)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -11))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 2))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n13)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -13))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 10))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (set! w n14)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -4))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 12))
+    (set! y (mul y x))
+    (set! z (add z y))
+    z))
+
+
+
+#|
+
+where z-prime refers to previous z-prime
+
+z-prime-4 :
+(+ 6 n4 (* 26 (+ n3 12 (* 26 (+ n2 (* 26 n1) 35)))))
+
+z-prime-5 :
+if n4 = n5 then takealpha else beta
+alpha: (= zout (floor (/ z-prime 26)))
+beta : (= zout (+ n5 9 (* 26 (floor (/ z-prime 26)))))))
+
+z-prime-6 :
+
+(= zout (div z-prime 26))
+(= zout (+ n6 15 (* 26 (div z-prime 26))))))
+
+z-prime-7 :
+(= zout z-prime)
+(= zout (+ n7 7 (* 26 z-prime)))))
+
+z-prime-8 :
+(= zout z-prime)
+(= zout (+ n8 12 (* 26 z-prime)))))
+			   
+z-prime-9 :
+(= zout (div z-prime 26))
+(= zout (+ n9 15 (* 26 (div z-prime 26))))))
+			   
+z-prime-10 :
+(= zout (div z-prime 26))
+(= zout (+ 3 n10 (* 26 (div z-prime 26))))))
+			     
+z-prime-11 :
+(= zout (+ 6 n11 (* 26 z-prime)))
+
+z-prime-12 :
+(= zout (div z-prime 26))
+(= zout (+ n12 2 (* 26 (div z-prime 26))))))
+			     
+z-prime-13 :
+(= zout (floor (/ z-prime 26)))
+(= zout (+ n13 10 (* 26 (floor (/ z-prime 26)))))))
+
+z-prime-14 :
+(= zout (floor (/ z-prime 26)))
+(= zout (+ n14 12 (* 26 (floor (/ z-prime 26)))))))
+			    
+
+---------------------------
+is it possible to get a negative zout ??
+
+Q - on test-11 determined cannot be alternative path ?? is this true ??
+
+
+|#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 
 
 
