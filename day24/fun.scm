@@ -9,6 +9,12 @@
 (import (chicken string))
 (import (chicken pretty-print))
 (import (chicken random))
+;;(import srfi-89)
+
+
+;;(import srfi-89)
+;; missing srfi-89 compatibility no egg for it ??
+
 ;;(define pp pretty-print)
 
 ;;(import (chicken doc))
@@ -658,12 +664,14 @@ only inputs control are n1 ... n14 for code
 		     (xout (second (assq 'x out)))
 		     (yout (second (assq 'y out)))
 		     (zout (second (assq 'z out))))
-		 ;;(format #t "n1 = ~a : out = ~a ~%" n1 out)
+		 ;;(format #t "n1 = ~a : zout = ~a ~%" n1 zout)
 		 (assert (= wout n1))
 		 (assert (= xout 1))
 		 (assert (= yout (+ n1 1)))
 		 (assert (= zout (+ n1 1)))
 		 )))))
+
+
 
 
 
@@ -2096,47 +2104,569 @@ z-prime-13 :
 
 z-prime-14 :
 (= zout (floor (/ z-prime 26)))
-(= zout (+ n14 12 (* 26 (floor (/ z-prime 26)))))))
-			    
+(= zout (+ n14 12 (* 26 (floor (/ z-prime 26)))))))		    
 
 ---------------------------
 is it possible to get a negative zout ??
-
 Q - on test-11 determined cannot be alternative path ?? is this true ??
-
 
 |#
 
+;; =========== code generator ===========================
+(define (make-ftest n)
+  (let ((fname (string->symbol (format #f "ftest~a" n)))
+	(nn (string->symbol (format #f "n~a" n))))
+  `(define (,fname z ,nn)
+     (let* ((w 0)(x 0)(y 0)(win w)(xin x)(yin y)(zin z))
+       ,@(comp n)
+       (let* ((wout w)(xout x)(yout y)(zout z))
+	 z)))))
 
 
+(define (make-ftest-all)
+  (do-list (n (cdr (iota 15)))
+	   (pp (make-ftest n))))
+
+;; ============== auto gne code =============================
+
+(define (ftest1 z n1)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n1)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 10))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 1))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest2 z n2)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n2)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 11))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 9))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest3 z n3)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n3)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 14))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 12))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest4 z n4)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n4)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 13))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 6))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest5 z n5)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n5)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -6))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 9))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest6 z n6)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n6)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -14))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 15))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest7 z n7)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n7)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 14))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 7))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest8 z n8)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n8)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 13))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 12))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest9 z n9)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n9)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -8))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 15))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest10 z n10)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n10)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -15))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 3))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest11 z n11)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n11)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 1))
+    (set! x (add x 10))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 6))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest12 z n12)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n12)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -11))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 2))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest13 z n13)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n13)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -13))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 10))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+(define (ftest14 z n14)
+  (let* ((w 0) (x 0) (y 0) (win w) (xin x) (yin y) (zin z))
+    (set! w n14)
+    (set! x (mul x 0))
+    (set! x (add x z))
+    (set! x (mod x 26))
+    (set! z (div z 26))
+    (set! x (add x -4))
+    (set! x (eql x w))
+    (set! x (eql x 0))
+    (set! y (mul y 0))
+    (set! y (add y 25))
+    (set! y (mul y x))
+    (set! y (add y 1))
+    (set! z (mul z y))
+    (set! y (mul y 0))
+    (set! y (add y w))
+    (set! y (add y 12))
+    (set! y (mul y x))
+    (set! z (add z y))
+    (let* ((wout w) (xout x) (yout y) (zout z)) z)))
+
+;; ============= end of auto gen code ==================================
 
 
+#|
+        w x y z n
+(ftest1 0 0 0 0 n1)    => n1+1
+(ftest2 0 0 0 n1+1 n2)  
+
+no point passing in w x y z
+w set to relevant n1 n2 ...
+x , y reset
+z is output from previous ftest
 
 
+(ftest1 z n1)
+(ftest1 0 1) => 2  outputs n1+1
+..
+(ftest 0 9) => 10 
+
+|#
+
+;; ================ code generator ==================================
+
+(define (make-gtest b)
+  (let ((res '()))
+    (do-list (n (cdr (iota (+ b 1))))
+	     (cond
+	      ((= n 1) (let ((z 0)
+			     (fname (string->symbol (format #f "ftest~a" n)))
+			     (nn (string->symbol (format #f "n~a" n))))
+			 (set! res `(,fname ,z ,nn))))
+	      (#t (let ((fname (string->symbol (format #f "ftest~a" n)))
+			(nn (string->symbol (format #f "n~a" n))))
+		    (set! res `(,fname ,res ,nn))))))
+    (let ((n b))
+      (let ((fname (string->symbol (format #f "gtest~a" n))))
+	(let ((args '()))
+	  (do-for i (1 (+ n 1))
+		  (let ((arg-n (string->symbol (format #f "n~a" i))))
+		    (set! args (cons arg-n args))))	
+	  `(define (,fname ,@(reverse args))
+	     ,res))))))
+
+(define (make-gtest-all)
+  (do-list (n (cdr (iota 15)))
+	   (pp (make-gtest n))))
+
+;;; ============= auto generated code =======================
+
+(define (gtest1 n1) (ftest1 0 n1))
+(define (gtest2 n1 n2) (ftest2 (ftest1 0 n1) n2))
+(define (gtest3 n1 n2 n3) (ftest3 (ftest2 (ftest1 0 n1) n2) n3))
+(define (gtest4 n1 n2 n3 n4) (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4))
+(define (gtest5 n1 n2 n3 n4 n5)
+  (ftest5 (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4) n5))
+(define (gtest6 n1 n2 n3 n4 n5 n6)
+  (ftest6 (ftest5 (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4) n5) n6))
+(define (gtest7 n1 n2 n3 n4 n5 n6 n7)
+  (ftest7
+    (ftest6 (ftest5 (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4) n5) n6)
+    n7))
+(define (gtest8 n1 n2 n3 n4 n5 n6 n7 n8)
+  (ftest8
+    (ftest7
+      (ftest6 (ftest5 (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4) n5) n6)
+      n7)
+    n8))
+(define (gtest9 n1 n2 n3 n4 n5 n6 n7 n8 n9)
+  (ftest9
+    (ftest8
+      (ftest7
+        (ftest6
+          (ftest5 (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4) n5)
+          n6)
+        n7)
+      n8)
+    n9))
+(define (gtest10 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10)
+  (ftest10
+    (ftest9
+      (ftest8
+        (ftest7
+          (ftest6
+            (ftest5 (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4) n5)
+            n6)
+          n7)
+        n8)
+      n9)
+    n10))
+(define (gtest11 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11)
+  (ftest11
+    (ftest10
+      (ftest9
+        (ftest8
+          (ftest7
+            (ftest6
+              (ftest5 (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4) n5)
+              n6)
+            n7)
+          n8)
+        n9)
+      n10)
+    n11))
+(define (gtest12 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12)
+  (ftest12
+    (ftest11
+      (ftest10
+        (ftest9
+          (ftest8
+            (ftest7
+              (ftest6
+                (ftest5 (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4) n5)
+                n6)
+              n7)
+            n8)
+          n9)
+        n10)
+      n11)
+    n12))
+(define (gtest13 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13)
+  (ftest13
+    (ftest12
+      (ftest11
+        (ftest10
+          (ftest9
+            (ftest8
+              (ftest7
+                (ftest6
+                  (ftest5 (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4) n5)
+                  n6)
+                n7)
+              n8)
+            n9)
+          n10)
+        n11)
+      n12)
+    n13))
+(define (gtest14 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14)
+  (ftest14
+    (ftest13
+      (ftest12
+        (ftest11
+          (ftest10
+            (ftest9
+              (ftest8
+                (ftest7
+                  (ftest6
+                    (ftest5
+                      (ftest4 (ftest3 (ftest2 (ftest1 0 n1) n2) n3) n4)
+                      n5)
+                    n6)
+                  n7)
+                n8)
+              n9)
+            n10)
+          n11)
+        n12)
+      n13)
+    n14))
+;;====================== auto gen code above ==========================
+
+;; ================= code generator =============================
+#|
+build the s expression out wards
+
+|#
+(define (make-brute)
+  (let* ((core '(let ((s (gtest14 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14)))
+		  (when (= s 1)
+		    (format #t "solution found ~%  ~a  ~%" (list n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14)))))
+	 (res core))
+    (do-list (n (reverse (cdr (iota 15))))
+	     (let ((nn (string->symbol (format #f "n~a" n))))
+	       (set! res `(do-list (,nn vals) ,res))))
+    `(define (brute)
+       (let ((vals ',(cdr (iota 15))))
+	 ,res))))
+
+;;======================= auto gen code ============================================
+(define (brute)
+  (let ((vals '(1 2 3 4 5 6 7 8 9 10 11 12 13 14)))
+    (do-list
+      (n1 vals)
+      (do-list
+        (n2 vals)
+        (do-list
+          (n3 vals)
+          (do-list
+            (n4 vals)
+            (do-list
+              (n5 vals)
+              (do-list
+                (n6 vals)
+                (do-list
+                  (n7 vals)
+                  (do-list
+                    (n8 vals)
+                    (do-list
+                      (n9 vals)
+                      (do-list
+                        (n10 vals)
+                        (do-list
+                          (n11 vals)
+                          (do-list
+                            (n12 vals)
+                            (do-list
+                              (n13 vals)
+                              (do-list
+                                (n14 vals)
+                                (let ((s (gtest14
+                                           n1
+                                           n2
+                                           n3
+                                           n4
+                                           n5
+                                           n6
+                                           n7
+                                           n8
+                                           n9
+                                           n10
+                                           n11
+                                           n12
+                                           n13
+                                           n14)))
+                                  (when (= s 1)
+                                        (format
+                                          #t
+                                          "solution found ~%  ~a  ~%"
+                                          (list n1
+                                                n2
+                                                n3
+                                                n4
+                                                n5
+                                                n6
+                                                n7
+                                                n8
+                                                n9
+                                                n10
+                                                n11
+                                                n12
+                                                n13
+                                                n14))))))))))))))))))))
 
 
-
-
-
-
-
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
+(brute)
 
