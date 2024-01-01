@@ -1,0 +1,82 @@
+
+
+
+
+
+README : day 24 aoc 2021
+
+solved finally !
+
+chicken scheme define-macro is equivalent to defmacro common lisp
+(define-macro (swap x y) ... )
+
+
+--------------------------------------------------------------------------
+
+
+foo.scm now contains the generated solutions forward ,
+then went back from those solutions generated z = 0 at ftest14
+
+foo2.scm working on finding solutions using known good values that lead to overall solution
+
+hopefully we should see some results soon ...
+
+--------------------------------------------------------------------------
+discovered been looking at wrong output , needed z = 0 out , not z = 1
+
+forward method , collecting
+
+
+
+ftest14 zin n1 => zout of 1
+only solutions find are zin = (zin 31, n14 1) .. (zin 39 , n14 9)
+
+trouble killing geiser process during execution 
+
+-------------------------------------------------------
+
+README : day 24 advent of code 2021
+
+*** stategy meeting ***
+
+lets try just get a "1" out of ftest14 only looking at n14
+(ftest14 z n14)
+
+no solutions found yet - Sat 30 Dec 16:15:41 GMT 2023
+
+
+last function ftest14 z n14
+something to do with n + 1
+also noticed same thing with ftest1 z n1
+something to do with n + 1
+
+letting computer run indefinitely on a mindless search does not produce
+any useful data
+
+
+
+
+
+
+input
+list of instructions
+
+
+
+fun.scm
+first attempt
+has an evaluator simulated
+also a
+
+
+comp int -> scheme list
+(comp 1) output scheme code for test 1
+
+
+------------
+chicken 5  and srfi-89
+no srfi-89
+
+
+
+
