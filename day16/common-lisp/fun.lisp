@@ -85,18 +85,51 @@ unless ? we could stack potential positions of the sub packets maybe ?
 
 (defun pack15 ()
   ;; operator consumed 7 bits so far , now 15 bits extra for number sub packets
-  (format t "pack15 found."))
+  ;; VVV TTT L <-- 11 bits ---> 
+  ;; (incf ir 7) consumed 7 bits already , 
+  ;; operator consumed 7 bits so far , now 11 bits extra for number sub packets
+  ;; 15 14   13 12  11 10   9  8  7  6  5   4   3    2   1 
+  ;; ir ir+1 2   3  4   5   6  7  8  9  10  11  12  13  14
+  (incf ir 7)
+  ;; 0 1 2 ... 3 4 5
+  (let* ((count (+ (* (expt 2 0) (aref input-array (+ 14 ir)))
+                   (* (expt 2 1) (aref input-array (+ 13 ir)))
+                   (* (expt 2 2) (aref input-array (+ 12 ir)))
+                   (* (expt 2 3) (aref input-array (+ 11 ir)))
+                   (* (expt 2 4) (aref input-array (+ 10 ir)))
+                   (* (expt 2 5) (aref input-array (+ 9 ir)))
+                   (* (expt 2 6) (aref input-array (+ 8 ir)))
+                   (* (expt 2 7) (aref input-array (+ 7 ir)))
+                   (* (expt 2 8) (aref input-array (+ 6 ir)))
+                   (* (expt 2 9) (aref input-array (+ 5 ir)))
+                   (* (expt 2 10) (aref input-array (+ 4 ir)))
+                   (* (expt 2 11) (aref input-array (+ 3 ir)))
+                   (* (expt 2 12) (aref input-array (+ 2 ir)))
+                   (* (expt 2 13) (aref input-array (+ 1 ir)))
+                   (* (expt 2 14) (aref input-array (+ 0 ir))))))
+    (format t "pack15 : ir count was ~a~%" count)))
+
 
 (defun pack11()
+  ;; VVV TTT L <-- 11 bits ---> 
+  ;; (incf ir 7) consumed 7 bits already , 
   ;; operator consumed 7 bits so far , now 11 bits extra for number sub packets
   ;; 11 10   9 8 7 6 5 4 3 2 1 
   ;; ir ir+1 2 3 4 5 6 7 8 9 10
-  (format t "pack11 found.")
-  (let* ((version (+ (* (exp 2 0) (aref input-array (+ 2 ir))) ;; 0 1 2 ... 3 4 5
-                     (* 2 (aref input-array (+ 1 ir)))
-                     (* 4 (aref input-array (+ 0 ir)))))
-  
-)
+  (incf ir 7)
+  ;; 0 1 2 ... 3 4 5
+  (let* ((count (+ (* (expt 2 0) (aref input-array (+ 10 ir)))
+                   (* (expt 2 1) (aref input-array (+ 9 ir)))
+                   (* (expt 2 2) (aref input-array (+ 8 ir)))
+                   (* (expt 2 3) (aref input-array (+ 7 ir)))
+                   (* (expt 2 4) (aref input-array (+ 6 ir)))
+                   (* (expt 2 5) (aref input-array (+ 5 ir)))
+                   (* (expt 2 6) (aref input-array (+ 4 ir)))
+                   (* (expt 2 7) (aref input-array (+ 3 ir)))
+                   (* (expt 2 8) (aref input-array (+ 2 ir)))
+                   (* (expt 2 9) (aref input-array (+ 1 ir)))
+                   (* (expt 2 10) (aref input-array (+ 0 ir))))))
+    (format t "pack11 : ir count was ~a~%" count)))
 
 
 (defun packrat ()  
@@ -106,13 +139,10 @@ unless ? we could stack potential positions of the sub packets maybe ?
          (type    (+ (* 1 (aref input-array (+ 5 ir)))
                      (* 2 (aref input-array (+ 4 ir)))
                      (* 4 (aref input-array (+ 3 ir))))))                     
-    (incf ir 3);;ignore 3 version bits
-    (incf ir 3);;ignore 3 type bits
     (format t "version ~a type ~a ~%" version type)
     (cond
       ((= type 4) (packlit))
       (t 
-       (incf ir) ;; length id 
        (let* ((len (aref input-array (+ 6 ir))))
          (cond
            ((= len 0) (pack15))
