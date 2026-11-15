@@ -95,13 +95,55 @@
                   (#t #f))))
 
 
+;; (string-length "110100101111111000101000")
+;; 110100101111111000101000
+;; VVVTTTxAAAAxBBBBxCCCC
+;; 6 +  3x5 (15) or (21) should be a multiple of 24 so drop 3
+
+(define bin2dec 
+  (lambda (xs)
+    (letrec ((bin (lambda (ys pwr acc)
+                    (cond
+                     ((null? ys) acc)
+                     (#t (let ((hd (car ys)))
+                           (bin (cdr ys) (+ pwr 1) (+ acc pwr))))))))
+      (bin xs 1 0))))
 
 
 (define pack 
   (lambda ()
+    ;; pack-lit v v v t t t 1 a a a 1 b b b 0 c c c ? ? ? ? 
+    ;;          0 1 2 3 4 5 
     (letrec ((pack-lit (lambda ()  
                         (format #t "pack-literal ~%")
-                               ))
+                        (let ((bools '())
+                              (nbits 6))
+                          (set! xs (drop xs 6)) ;; drop vvv ttt  
+                          (letrec ((keep (lambda ()
+                                           (let ((again (list-ref xs 0))
+                                                 (a (list-ref xs 1))
+                                                 (b (list-ref xs 2))
+                                                 (c (list-ref xs 3))
+                                                 (d (list-ref xs 4)))
+                                             (set! nbits (+ nbits 5))
+                                             (set! bools (append bools (list a b c d)))
+                                             (cond
+                                              ((= again 1)  ;; loop again
+                                               (set! xs (drop xs 5)) 
+                                               (keep))
+                                              (#t (set! xs (drop xs 5))
+                                                  ;; how many to drop? 
+                                                  ;; drop bits such literal packet not multiple of 4 
+                                                  (letrec ((mult4 (lambda ()
+                                                                    (cond
+                                                                     ((not (zero? (modulo nbits 4)))
+                                                                      (set! xs (drop xs 1))
+                                                                      (set! nbits (+ 1 nbits))
+                                                                      (mult4))))))
+                                                    (mult4) 
+                                                    (set! bools (reverse bools))
+                                                    
+                            
              ;; pack-15 v v v t t t L 1 2 3 4  5  6  7  8  9  10 11 12 13 14 15    
              ;;         0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 ... nth list ref offsets
              ;;  (7+15 => 22) 22 bool consumed
