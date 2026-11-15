@@ -94,6 +94,9 @@ let packet_id (xs : int list) : int * int list =
   | a :: b :: c :: tl ->  (c + (b * 2) + (a * 4) , tl)
   | _ -> raise BadPacketId
 
+(* peel off 3 bool values and always have the rest of the tail passed back 
+this way we avoid committing to a course of action? prematurely?
+*)
 let packet_version_id (xs : int list) : int * int * int list = 
    let (version , tl) = packet_version xs in
    let (ident , tl2) = packet_id tl in 
@@ -131,7 +134,47 @@ So, this packet represents a literal value with binary representation 0111111001
 
 exception BadDecodePV4 of int list
 
-(* are we assuming well formed tails of packets with ident of 4 ?? *)
+(* are we assuming well formed tails of packets with ident of 4 ?? 
+how are we going to track the tail of the list ?
+given a list of bools if the first item is a 1 then 
+
+every packet 
+V V V 
+3 bits version 
+      Id Id Id 
+      3 bits id 
+
+most significant bit encoding on binary values  100 boolean represents 4 in decimal 
+reverse bits (msb first) 
+ 0 0 1
+ 1 2 4   so 1 x 4 = 4  decimal equivalent 
+
+binary number is padded so its length is a multiple of 4 bits
+then is broken into groups of 4 bits 
+
+each group is prefixed by a 1 bit except last group which gets a 0 bit 
+
+VVVIII1aaaa1bbbb0cccc
+                ^---- last group 0 bit followed by 4 bits composing the number 
+<-need to know how long this was---> 
+this has length of 21 is that a multiple of 4 ??
+5 * 4 = 20
+6 * 4 = 24  
+
+  then determine how many more bits we need to drop from the list since packet is a multiple of 4 bits?
+if consumed exact multiple of 4 bits we drop 0 bits (no more consumed)
+if consumed one bit of next character , we drop 3 bits
+if consumed two bits of next char , we drop 2 bits
+if consumed three bits of next char , we drop 1 bits
+ 
+OR if we consume by hex character we are already consuming in 4 bit blocks , so we can ignore dropping
+bits issue altogether
+
+can we be lazily on the given input string ?
+
+decode xs k  
+
+*)
 let rec decode_pv4 (xs : int list) : int list = 
  match xs with 
  | 1 :: b :: c :: d :: e :: tl -> [b;c;d;e] @ (decode_pv4 tl)
@@ -147,10 +190,26 @@ let pv4 (xs : int list) : (int list) option =
    else None
 
 (* pv4 (hex2bools "D2FE28") 
+we will ignore ...
+
 [0; 1; 1; 1; 1; 1; 1; 0; 0; 1; 0; 1] -- ok 
 011111100101
 2021 in decimal
+
+packet type id of 4 -- send to pv4
+otherwise operator packet -- 
+
+let packrat be our entry given we have a list of bools 
+hex2bools
 *)
+
+
+let packrat (xs : int list) : (int list list) = 
+  match pv4 xs with
+    | Some res -> [res]  (* type id 4 --- int list*) 
+    | None -> [] (* not type id 4 -- its an operator what do we do now ? *) 
+
+
 
 
 

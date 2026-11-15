@@ -10,8 +10,7 @@ let cwd () = Printf.printf "Current working directory: %s\n" (Sys.getcwd ())
 let () =   
    let content = read_file_to_string "../input.txt" in print_endline content
 
-o;; let () = print_endline "Hello, World!"
-
+let () = print_endline "Hello, World!"
 
 (* Usage *)
 let () = Day16.Util.print_int_list [10; 20; 30] (* Output: [10; 20; 30] *)
@@ -23,8 +22,8 @@ List.iter (fun x -> Printf.printf "testing %c => " x ;
 	       Day16.Util.print_int_list (Day16.Util.hex_to_bools x)) hexchars
 
 
-	       (* each letter in string generates a list of booleans , which are eventually all flattened out to a big list of
-		  booleans*)	       
+(* each letter in string generates a list of booleans , which are eventually all flattened out to a big list of
+   booleans*)	       
 	       
 let vv : int list =
   let abcd = Day16.Util.string_to_chars "ABCD" in
