@@ -90,6 +90,9 @@
 ;;                                       (foo (- n 1))))))
 ;;                   (foo n)))))
 
+;; repeat something n times 
+;; pros : no macrology required
+;; cons : wrap body in another lambda 
 (define repeat (lambda (n fn)
                  (cond
                   ((> n 0) (fn n) (repeat (- n 1) fn))
